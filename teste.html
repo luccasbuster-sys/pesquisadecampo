@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Pesquisa Rápida de Mercado | Solar Materiais</title>
+  <meta name="theme-color" content="#0f172a" />
+  <style>
+    :root {
+      --bg: #eff4fb;
+      --surface: #ffffff;
+      --surface-soft: #f8fbff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --line: #d8e3f0;
+      --primary: #2563eb;
+      --primary-strong: #1d4ed8;
+      --primary-soft: #dbeafe;
+      --success: #10b981;
+      --danger: #ef4444;
+      --shadow: 0 20px 45px rgba(15, 23, 42, 0.09);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 18px;
+      --radius-sm: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top, rgba(37, 99, 235, 0.11), transparent 28%),
+        linear-gradient(180deg, #eef4ff 0%, var(--bg) 30%, #eef2f7 100%);
+    }
+
+    .app {
+      width: 100%;
+      max-width: 430px;
+      margin: 0 auto;
+      min-height: 100vh;
+      padding: env(safe-area-inset-top) 14px calc(102px + env(safe-area-inset-bottom));
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      margin: 0 -14px;
+      padding: 12px 14px 10px;
+      backdrop-filter: blur(14px);
+      background: linear-gradient(180deg, rgba(239, 244, 251, 0.96), rgba(239, 244, 251, 0.82));
+      border-bottom: 1px solid rgba(216, 227, 240, 0.7);
+      transition: padding .32s ease, background .32s ease, border-color .32s ease;
+    }
+
+    .topbar.scrolled {
+      padding: 8px 14px 6px;
+      background: linear-gradient(180deg, rgba(239, 244, 251, 0.92), rgba(239, 244, 251, 0.78));
+      border-bottom: 1px solid rgba(216, 227, 240, 0.55);
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      background: #ffffff;
+      color: #0f172a;
+      border-radius: 22px;
+      padding: 12px 12px 10px;
+      box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+      border: 1px solid rgba(216, 227, 240, 0.9);
+      transition:
+        padding .38s cubic-bezier(.22, 1, .36, 1),
+        border-radius .38s cubic-bezier(.22, 1, .36, 1),
+        box-shadow .38s ease,
+        transform .38s ease,
+        opacity .28s ease;
+      transform-origin: top center;
+      will-change: padding, transform, border-radius;
+    }
+
+    .hero.compact {
+      padding: 9px 10px 8px;
+      border-radius: 18px;
+      box-shadow: 0 10px 20px rgba(37, 99, 235, 0.14);
+      transform: translateY(-1px) scale(0.985);
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -28px;
+      bottom: -28px;
+      width: 112px;
+      height: 112px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      transition: transform .38s ease, opacity .32s ease, width .32s ease, height .32s ease;
+    }
+
+    .hero.compact::after {
+      width: 88px;
+      height: 88px;
+      opacity: .82;
+      transform: translateY(4px);
+    }
+
+    .hero-logo-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0 0 10px;
+      opacity: 0;
+      transform: translateY(10px) scale(0.98);
+      animation: logoEnter .7s cubic-bezier(.22, 1, .36, 1) .08s forwards;
+      transform-origin: top center;
+      transition: margin .34s ease, transform .34s ease, opacity .28s ease, max-height .34s ease;
+      max-height: 88px;
+      overflow: hidden;
+    }
+
+    .hero-logo {
+      display: block;
+      width: min(100%, 238px);
+      height: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 10px 22px rgba(15, 23, 42, 0.16));
+      transition: width .34s ease, transform .34s ease, filter .34s ease;
+    }
+
+    .hero.compact .hero-logo-wrap {
+      margin-bottom: 6px;
+      max-height: 54px;
+      transform: translateY(0) scale(0.96);
+    }
+
+    .hero.compact .hero-logo {
+      width: min(100%, 170px);
+      filter: drop-shadow(0 6px 14px rgba(15, 23, 42, 0.14));
+    }
+
+    .hero-logo-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0 0 10px;
+      opacity: 0;
+      transform: translateY(10px) scale(0.98);
+      animation: logoEnter .7s cubic-bezier(.22, 1, .36, 1) .08s forwards;
+      transform-origin: top center;
+      transition: margin .34s ease, transform .34s ease, opacity .28s ease, max-height .34s ease;
+      max-height: 88px;
+      overflow: hidden;
+    }
+
+    .hero-logo {
+      display: block;
+      width: min(100%, 238px);
+      height: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 10px 22px rgba(15, 23, 42, 0.16));
+      transition: width .34s ease, transform .34s ease, filter .34s ease;
+    }
+
+    .hero.compact .hero-logo-wrap {
+      margin-bottom: 6px;
+      max-height: 54px;
+      transform: translateY(0) scale(0.96);
+    }
+
+    .hero.compact .hero-logo {
+      width: min(100%, 170px);
+      filter: drop-shadow(0 6px 14px rgba(15, 23, 42, 0.14));
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+      transition: margin .32s ease, opacity .28s ease, transform .32s ease, max-height .3s ease;
+      transform-origin: top left;
+      max-height: 80px;
+      overflow: hidden;
+    }
+
+    .hero.compact .badge-row {
+      margin-bottom: 8px;
+      transform: scale(0.96);
+      max-height: 52px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      min-height: 28px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .hero h1 {
+      margin: 0 0 4px;
+      font-size: 1.15rem;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      color: #0f172a;
+      transition: font-size .34s ease, margin .34s ease, transform .34s ease;
+      transform-origin: left top;
+    }
+
+    .hero.compact h1 {
+      font-size: 1rem;
+      transform: translateY(1px);
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 26ch;
+      font-size: 0.82rem;
+      line-height: 1.35;
+      color: #475569;
+      max-height: 80px;
+      opacity: 1;
+      overflow: hidden;
+      transition: opacity .22s ease, max-height .32s ease, margin .28s ease, transform .28s ease;
+    }
+
+    .hero.compact p {
+      opacity: 0;
+      max-height: 0;
+      margin-top: -2px;
+      transform: translateY(-4px);
+    }
+
+    .progress-box {
+      margin-top: 8px;
+      display: grid;
+      gap: 6px;
+      transition: margin .32s ease, transform .32s ease;
+      transform-origin: top left;
+    }
+
+    .hero.compact .progress-box {
+      margin-top: 6px;
+      transform: scale(0.985);
+    }
+
+    .progress-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: #334155;
+      font-size: 0.83rem;
+      font-weight: 700;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #2563eb, #60a5fa);
+      transition: width .28s ease;
+    }
+
+    .panel {
+      background: var(--surface);
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(216, 227, 240, 0.9);
+      box-shadow: var(--shadow);
+      padding: 18px 16px 16px;
+      min-height: 58vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .step-head {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .step-number {
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      background: var(--primary-soft);
+      color: var(--primary-strong);
+      font-weight: 900;
+      font-size: 0.98rem;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+    }
+
+    .step-label {
+      margin: 0 0 4px;
+      font-size: 0.82rem;
+      color: var(--primary-strong);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    .step-title {
+      margin: 0;
+      font-size: 1.35rem;
+      line-height: 1.2;
+      letter-spacing: -0.03em;
+    }
+
+    .step-desc {
+      margin: 10px 0 0;
+      font-size: 0.93rem;
+      color: var(--muted);
+      line-height: 1.5;
+      max-width: 32ch;
+    }
+
+    .field-area {
+      display: grid;
+      gap: 12px;
+      align-content: start;
+      min-height: 280px;
+    }
+
+    .input,
+    textarea,
+    .select {
+      width: 100%;
+      border: 1.6px solid var(--line);
+      border-radius: 18px;
+      background: var(--surface-soft);
+      color: var(--text);
+      padding: 16px 16px;
+      font-size: 1.04rem;
+      line-height: 1.45;
+      outline: none;
+      transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+
+    .input:focus,
+    textarea:focus,
+    .select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+      background: #fff;
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: none;
+    }
+
+    .quick-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .ghost-btn {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 999px;
+      min-height: 42px;
+      padding: 0 14px;
+      font-size: 0.87rem;
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .choices {
+      display: grid;
+      gap: 12px;
+    }
+
+    .choice {
+      position: relative;
+    }
+
+    .choice input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .choice-card {
+      width: 100%;
+      min-height: 68px;
+      border-radius: 22px;
+      border: 1.6px solid var(--line);
+      background: linear-gradient(180deg, #fcfdff, #f9fbff);
+      padding: 16px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--text);
+      transition: transform .16s ease, box-shadow .2s ease, border-color .2s ease, background .2s ease;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .choice-card::before {
+      content: "";
+      width: 24px;
+      height: 24px;
+      flex: 0 0 auto;
+      border-radius: 999px;
+      border: 2px solid #b8c9e4;
+      background: white;
+      box-shadow: inset 0 0 0 5px #fff;
+      transition: all .18s ease;
+    }
+
+    .choice.checkbox .choice-card::before {
+      border-radius: 8px;
+    }
+
+    .choice input:checked + .choice-card {
+      border-color: rgba(37,99,235,.52);
+      background: linear-gradient(180deg, #eff6ff, #ffffff);
+      box-shadow: 0 16px 30px rgba(37,99,235,.12);
+      transform: translateY(-1px);
+    }
+
+    .choice input:checked + .choice-card::before {
+      border-color: var(--primary);
+      background: var(--primary);
+      box-shadow: inset 0 0 0 5px #fff;
+    }
+
+    .helper-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 0.84rem;
+      color: var(--muted);
+    }
+
+    .helper-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 30px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #eef4ff;
+      color: var(--primary-strong);
+      font-weight: 800;
+    }
+
+    .validation {
+      display: none;
+      color: var(--danger);
+      font-size: 0.88rem;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .validation.show {
+      display: block;
+    }
+
+    .microcopy {
+      padding: 13px 14px;
+      border-radius: 16px;
+      background: #f8fafc;
+      border: 1px dashed var(--line);
+      color: var(--muted);
+      font-size: 0.87rem;
+      line-height: 1.45;
+    }
+
+    .step-card {
+      display: none;
+      animation: rise .28s ease;
+    }
+
+    .step-card.active {
+      display: block;
+    }
+
+    .footer-actions {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 40;
+      padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
+      background: linear-gradient(180deg, rgba(239,244,251,0), rgba(239,244,251,.88) 18%, rgba(239,244,251,.98));
+      backdrop-filter: blur(14px);
+    }
+
+    .footer-inner {
+      width: 100%;
+      max-width: 430px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 86px 1fr;
+      gap: 10px;
+    }
+
+    button {
+      border: 0;
+      min-height: 60px;
+      border-radius: 20px;
+      font-size: 1rem;
+      font-weight: 900;
+      cursor: pointer;
+      transition: transform .14s ease, box-shadow .2s ease, opacity .18s ease;
+    }
+
+    button:active {
+      transform: scale(.985);
+    }
+
+    .btn-back {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    .btn-next {
+      background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+      color: white;
+      box-shadow: 0 18px 34px rgba(37,99,235,.26);
+    }
+
+    .btn-next.secondary {
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      box-shadow: 0 18px 34px rgba(15,23,42,.18);
+    }
+
+    .summary,
+    .done {
+      display: none;
+      background: var(--surface);
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(216, 227, 240, 0.9);
+      box-shadow: var(--shadow);
+      padding: 20px 16px;
+    }
+
+    .summary.active,
+    .done.active {
+      display: block;
+      animation: rise .3s ease;
+    }
+
+    .summary h3,
+    .done h3 {
+      margin: 0 0 8px;
+      font-size: 1.22rem;
+      letter-spacing: -0.02em;
+    }
+
+    .summary p,
+    .done p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .summary-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .summary-item {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px 13px;
+      background: #fbfdff;
+    }
+
+    .summary-item strong {
+      display: block;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: var(--primary-strong);
+      margin-bottom: 4px;
+    }
+
+    .summary-item span {
+      color: var(--text);
+      font-weight: 700;
+      line-height: 1.45;
+    }
+
+    .done-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 24px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 14px;
+      background: linear-gradient(135deg, #d1fae5, #ecfdf5);
+      color: var(--success);
+      font-size: 2rem;
+      font-weight: 900;
+    }
+
+    .done-actions {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .done-actions button {
+      min-height: 54px;
+      border-radius: 18px;
+      font-size: 0.96rem;
+    }
+
+    .btn-plain {
+      background: #e2e8f0;
+      color: #0f172a;
+      box-shadow: none;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @keyframes logoEnter {
+      from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes logoFloatIn {
+      from {
+        opacity: 0;
+        transform: translateY(-8px) scale(.96);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (min-width: 700px) {
+      body { padding: 24px 0; }
+      .app { max-width: 480px; }
+      .footer-inner { max-width: 480px; }
+      .topbar { border-radius: 28px; margin: 0; border: 1px solid rgba(216, 227, 240, 0.7); }
+      .hero-logo { width: min(100%, 270px); }
+      .hero.compact .hero-logo { width: min(100%, 190px); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="topbar">
+      <section class="hero">
+        <div class="hero-logo-wrap">
+          <img class="hero-logo" src="logo.png" alt="Grupo Cunha & Santos" />
+        </div>
+        <div class="badge-row">
+          <span class="badge">📍 Trindade</span>
+          <span class="badge">⚡ Menos de 1 minuto</span>
+          <span class="badge">🧾 Uso interno</span>
+        </div>
+        <h1>Pesquisa rápida de mercado</h1>
+        <p>Fluxo simples para coleta em campo, com toque fácil, menos digitação e uma pergunta por vez.</p>
+        <div class="progress-box">
+          <div class="progress-meta">
+            <span id="progressText">Pergunta 1 de 8</span>
+            <span id="progressTime">~ 50s restantes</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        </div>
+      </section>
+    </div>
+
+    <form id="surveyForm" novalidate>
+      <section class="panel" id="wizardPanel">
+        <div>
+          <div class="step-card active" data-step-index="0" data-key="bairro">
+            <div class="step-head">
+              <div class="step-number">1</div>
+              <div>
+                <p class="step-label">Identificação</p>
+                <h2 class="step-title">Em qual bairro você mora?</h2>
+                <p class="step-desc">Digite o bairro do entrevistado. Para acelerar a coleta, você pode usar uma sugestão rápida abaixo.</p>
+              </div>
+            </div>
+            <div class="field-area">
+              <input class="input" type="text" name="bairro" id="bairro" placeholder="Ex.: Jardim Imperial" autocomplete="address-level3" />
+              <div class="quick-actions">
+                <button class="ghost-btn" type="button" data-fill="Setor Cristina">Setor Cristina</button>
+                <button class="ghost-btn" type="button" data-fill="Jardim Imperial">Jardim Imperial</button>
+                <button class="ghost-btn" type="button" data-fill="Vila Pai Eterno">Vila Pai Eterno</button>
+                <button class="ghost-btn" type="button" data-fill="Maysa">Maysa</button>
+              </div>
+              <div class="microcopy">Dica de operação: mantenha o nome do bairro sempre padronizado para facilitar análise posterior.</div>
+              <div class="validation" data-error-for="bairro">Informe o bairro para continuar.</div>
+            </div>
+          </div>
+
+          <div class="step-card" data-step-index="1" data-key="idade">
+            <div class="step-head">
+              <div class="step-number">2</div>
+              <div>
+                <p class="step-label">Perfil</p>
+                <h2 class="step-title">Qual sua idade?</h2>
+                <p class="step-desc">Selecione apenas uma faixa etária.</p>
+              </div>
+            </div>
+            <div class="field-area">
+              <div class="choices">
+                <label class="choice"><input type="radio" name="idade" value="18–23"><span class="choice-card">18–23</span></label>
+                <label class="choice"><input type="radio" name="idade" value="24–30"><span class="choice-card">24–30</span></label>
+                <label class="choice"><input type="radio" name="idade" value="31–40"><span class="choice-card">31–40</span></label>
+                <label class="choice"><input type="radio" name="idade" value="41–55"><span class="choice-card">41–55</span></label>
+                <label class="choice"><input type="radio" name="idade" value="56+"><span class="choice-card">56+</span></label>
+              </div>
+              <div class="validation" data-error-for="idade">Escolha uma faixa etária para continuar.</div>
+            </div>
+          </div>
+
+          <div class="step-card" data-step-index="2" data-key="genero">
+            <div class="step-head">
+              <div class="step-number">3</div>
+              <div>
+                <p class="step-label">Perfil</p>
+                <h2 class="step-title">Gênero (percepção)</h2>
+                <p class="step-desc">Marque a percepção observada durante a entrevista.</p>
+              </div>
+            </div>
+            <div class="field-area">
+              <div class="choices">
+                <label class="choice"><input type="radio" name="genero" value="Masculino"><span class="choice-card">Masculino</span></label>
+                <label class="choice"><input type="radio" name="genero" value="Feminino"><span class="choice-card">Feminino</span></label>
+              </div>
+              <div class="validation" data-error-for="genero">Selecione uma opção para continuar.</div>
+            </div>
+          </div>
+
+          <div class="step-card" data-step-index="3" data-key="lembranca_marca">
+            <div class="step-head">
+              <div class="step-number">4</div>
+              <div>
+                <p class="step-label">Marca</p>
+                <h2 class="step-title">Quando pensa em loja de materiais para construção em Trindade, qual lembra primeiro?</h2>
+                <p class="step-desc">Registre a primeira loja citada. Se a pessoa não souber, use o atalho abaixo.</p>
+              </div>
+            </div>
+            <div class="field-area">
+              <textarea name="lembranca_marca" id="lembranca_marca" placeholder="Digite a primeira loja mencionada..."></textarea>
+              <div class="quick-actions">
+                <button class="ghost-btn" type="button" data-target="lembranca_marca" data-value="Não soube responder">Não soube responder</button>
+              </div>
+              <div class="validation" data-error-for="lembranca_marca">Registre a resposta para continuar.</div>
+            </div>
+          </div>
+
+          <div class="step-card" data-step-index="4" data-key="conhece_solar">
+            <div class="step-head">
+              <div class="step-number">5</div>
+              <div>
+                <p class="step-label">Reconhecimento</p>
+                <h2 class="step-title">Você conhece a Solar Materiais para Construção aqui em Trindade?</h2>
+                <p class="step-desc">Escolha a resposta que melhor representa o nível de conhecimento da marca.</p>
+              </div>
+            </div>
+            <div class="field-area">
+              <div class="choices">
+                <label class="choice"><input type="radio" name="conhece_solar" value="Sim"><span class="choice-card">Sim</span></label>
+                <label class="choice"><input type="radio" name="conhece_solar" value="Já ouvi falar"><span class="choice-card">Já ouvi falar</span></label>
+                <label class="choice"><input type="radio" name="conhece_solar" value="Não"><span class="choice-card">Não</span></label>
+              </div>
+              <div class="validation" data-error-for="conhece_solar">Selecione uma resposta para continuar.</div>
+            </div>
+          </div>
+
+          <div class="step-card hidden" data-step-index="5" data-key="ja_comprou" data-conditional="conhece_solar=Sim">
+            <div class="step-head">
+              <div class="step-number">6</div>
+              <div>
+                <p class="step-label">Relacionamento</p>
+                <h2 class="step-title">Você já comprou na Solar?</h2>
+                <p class="step-desc">Essa pergunta aparece apenas para quem conhece a marca.</p>
+              </div>
+            </div>
+            <div class="field-area">
+              <div class="microcopy">Como a pessoa conhece a Solar, vamos aprofundar com mais duas perguntas rápidas.</div>
+              <div class="choices">
+                <label class="choice"><input type="radio" name="ja_comprou" value="Sim"><span class="choice-card">Sim</span></label>
+                <label class="choice"><input type="radio" name="ja_comprou" value="Não"><span class="choice-card">Não</span></label>
+              </div>
+              <div class="validation" data-error-for="ja_comprou">Selecione uma resposta para continuar.</div>
+            </div>
+          </div>
+
+          <div class="step-card hidden" data-step-index="6" data-key="frequencia" data-conditional="ja_comprou=Sim|conhece_solar=Sim">
+            <div class="step-head">
+              <div class="step-number">7</div>
+              <div>
+                <p class="step-label">Recorrência</p>
+                <h2 class="step-title">Com que frequência você compra na Solar?</h2>
+                <p class="step-desc">Aparece apenas quando o entrevistado já comprou na Solar.</p>
+              </div>
+            </div>
+            <div class="field-area">
+              <div class="choices">
+                <label class="choice"><input type="radio" name="frequencia" value="Apenas uma vez"><span class="choice-card">Apenas uma vez</span></label>
+                <label class="choice"><input type="radio" name="frequencia" value="Algumas vezes"><span class="choice-card">Algumas vezes</span></label>
+                <label class="choice"><input type="radio" name="frequencia" value="Frequentemente"><span class="choice-card">Frequentemente</span></label>
+              </div>
+              <div class="validation" data-error-for="frequencia">Selecione a frequência para continuar.</div>
+            </div>
+          </div>
+
+          <div class="step-card" data-step-index="7" data-key="pesquisa_online">
+            <div class="step-head">
+              <div class="step-number">8</div>
+              <div>
+                <p class="step-label">Comportamento</p>
+                <h2 class="step-title">Você costuma pesquisar material de construção no Instagram ou internet?</h2>
+                <p class="step-desc">Marque o hábito mais próximo da realidade do entrevistado.</p>
+              </div>
+            </div>
+            <div class="field-area">
+              <div class="choices">
+                <label class="choice"><input type="radio" name="pesquisa_online" value="Sim"><span class="choice-card">Sim</span></label>
+                <label class="choice"><input type="radio" name="pesquisa_online" value="Não"><span class="choice-card">Não</span></label>
+              </div>
+              <div class="validation" data-error-for="pesquisa_online">Selecione uma resposta para continuar.</div>
+            </div>
+          </div>
+
+          <div class="step-card" data-step-index="8" data-key="influencia">
+            <div class="step-head">
+              <div class="step-number">9</div>
+              <div>
+                <p class="step-label">Decisão de compra</p>
+                <h2 class="step-title">O que mais influencia sua escolha de uma loja de materiais para construção?</h2>
+                <p class="step-desc">Escolha até 2 opções. Ao atingir o limite, as demais ficam bloqueadas.</p>
+              </div>
+            </div>
+            <div class="field-area">
+              <div class="helper-row">
+                <span>Selecione até 2 fatores</span>
+                <span class="helper-badge" id="checkCounter">0/2</span>
+              </div>
+              <div class="choices" id="checkboxGroup">
+                <label class="choice checkbox"><input type="checkbox" name="influencia" value="Atendimento"><span class="choice-card">Atendimento</span></label>
+                <label class="choice checkbox"><input type="checkbox" name="influencia" value="Variedade de produtos"><span class="choice-card">Variedade de produtos</span></label>
+                <label class="choice checkbox"><input type="checkbox" name="influencia" value="Agilidade na Entrega"><span class="choice-card">Agilidade na Entrega</span></label>
+                <label class="choice checkbox"><input type="checkbox" name="influencia" value="Localização"><span class="choice-card">Localização</span></label>
+                <label class="choice checkbox"><input type="checkbox" name="influencia" value="Preço"><span class="choice-card">Preço</span></label>
+                <label class="choice checkbox"><input type="checkbox" name="influencia" value="Confiança na loja"><span class="choice-card">Confiança na loja</span></label>
+              </div>
+              <div class="validation" data-error-for="influencia">Selecione pelo menos 1 fator para continuar.</div>
+            </div>
+          </div>
+
+          <div class="step-card" data-step-index="9" data-key="intencao_reforma">
+            <div class="step-head">
+              <div class="step-number">10</div>
+              <div>
+                <p class="step-label">Fechamento</p>
+                <h2 class="step-title">Você pretende construir ou reformar nos próximos 6 meses?</h2>
+                <p class="step-desc">Última pergunta da coleta.</p>
+              </div>
+            </div>
+            <div class="field-area">
+              <div class="choices">
+                <label class="choice"><input type="radio" name="intencao_reforma" value="Sim"><span class="choice-card">Sim</span></label>
+                <label class="choice"><input type="radio" name="intencao_reforma" value="Não"><span class="choice-card">Não</span></label>
+                <label class="choice"><input type="radio" name="intencao_reforma" value="Talvez"><span class="choice-card">Talvez</span></label>
+              </div>
+              <div class="validation" data-error-for="intencao_reforma">Selecione uma resposta para continuar.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="summary" id="summaryScreen">
+        <h3>Revisão rápida da entrevista</h3>
+        <p>Confira as respostas antes de registrar. Isso ajuda a evitar erro de coleta em campo.</p>
+        <div class="summary-list" id="summaryList"></div>
+      </section>
+
+      <section class="done" id="doneScreen">
+        <div class="done-icon">✓</div>
+        <h3>Resposta salva com sucesso</h3>
+        <p>A entrevista foi registrada e o fluxo está pronto para repetir a próxima coleta.</p>
+        <div class="done-actions">
+          <button type="button" class="btn-next" id="newInterviewBtn">Nova entrevista</button>
+          <button type="button" class="btn-plain" id="editInterviewBtn">Editar resposta</button>
+        </div>
+      </section>
+    </form>
+  </div>
+
+  <div class="footer-actions">
+    <div class="footer-inner">
+      <button type="button" class="btn-back" id="backBtn">Voltar</button>
+      <button type="button" class="btn-next" id="nextBtn">Próxima</button>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('surveyForm');
+    const stepCards = Array.from(document.querySelectorAll('.step-card'));
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    const progressTime = document.getElementById('progressTime');
+    const backBtn = document.getElementById('backBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const wizardPanel = document.getElementById('wizardPanel');
+    const summaryScreen = document.getElementById('summaryScreen');
+    const doneScreen = document.getElementById('doneScreen');
+    const summaryList = document.getElementById('summaryList');
+    const newInterviewBtn = document.getElementById('newInterviewBtn');
+    const editInterviewBtn = document.getElementById('editInterviewBtn');
+    const bairroInput = document.getElementById('bairro');
+    const marcaInput = document.getElementById('lembranca_marca');
+    const checkboxes = Array.from(document.querySelectorAll('input[name="influencia"]'));
+    const checkCounter = document.getElementById('checkCounter');
+
+    let currentVisibleIndex = 0;
+    let reviewing = false;
+
+    const labels = {
+      bairro: 'Bairro',
+      idade: 'Idade',
+      genero: 'Gênero',
+      lembranca_marca: 'Primeira loja lembrada',
+      conhece_solar: 'Conhece a Solar',
+      ja_comprou: 'Já comprou na Solar',
+      frequencia: 'Frequência de compra',
+      pesquisa_online: 'Pesquisa online',
+      influencia: 'Fatores de decisão',
+      intencao_reforma: 'Pretende construir ou reformar'
+    };
+
+    function getValue(name) {
+      const nodes = form.elements[name];
+      if (!nodes) return '';
+
+      if (nodes instanceof RadioNodeList) {
+        const arr = Array.from(nodes);
+        if (!arr.length) return '';
+        if (arr[0].type === 'checkbox') return arr.filter(i => i.checked).map(i => i.value);
+        return arr.find(i => i.checked)?.value || '';
+      }
+
+      return nodes.value.trim();
+    }
+
+    function shouldShowStep(step) {
+      const condition = step.dataset.conditional;
+      if (!condition) return true;
+
+      const groups = condition.split('|');
+      return groups.every(rule => {
+        const [field, expected] = rule.split('=');
+        return getValue(field) === expected;
+      });
+    }
+
+    function refreshConditionalSteps() {
+      stepCards.forEach(step => {
+        const visible = shouldShowStep(step);
+        step.classList.toggle('hidden', !visible);
+
+        if (!visible) {
+          const key = step.dataset.key;
+          const field = form.elements[key];
+          if (field instanceof RadioNodeList) {
+            Array.from(field).forEach(i => i.checked = false);
+          } else if (field) {
+            field.value = '';
+          }
+        }
+      });
+    }
+
+    function getVisibleSteps() {
+      refreshConditionalSteps();
+      return stepCards.filter(step => !step.classList.contains('hidden'));
+    }
+
+    function showValidation(key, show) {
+      const el = document.querySelector(`[data-error-for="${key}"]`);
+      if (el) el.classList.toggle('show', !!show);
+    }
+
+    function validateStep(step) {
+      const key = step.dataset.key;
+      let valid = false;
+
+      if (key === 'bairro' || key === 'lembranca_marca') {
+        valid = getValue(key).length > 0;
+      } else if (key === 'influencia') {
+        valid = getValue(key).length > 0;
+      } else {
+        valid = !!getValue(key);
+      }
+
+      showValidation(key, !valid);
+      return valid;
+    }
+
+    function updateProgress() {
+      const visibleSteps = getVisibleSteps();
+      const total = visibleSteps.length;
+      const position = Math.min(currentVisibleIndex + 1, total);
+      const percent = total ? Math.round((position / total) * 100) : 0;
+      const remaining = Math.max((total - position) * 6, 0);
+
+      progressFill.style.width = percent + '%';
+      progressText.textContent = reviewing ? 'Revisão final' : `Pergunta ${position} de ${total}`;
+      progressTime.textContent = reviewing ? 'pronto para salvar' : `~ ${remaining || 5}s restantes`;
+    }
+
+    function renderCurrentStep() {
+      const visibleSteps = getVisibleSteps();
+      if (currentVisibleIndex > visibleSteps.length - 1) currentVisibleIndex = visibleSteps.length - 1;
+      if (currentVisibleIndex < 0) currentVisibleIndex = 0;
+
+      stepCards.forEach(step => step.classList.remove('active'));
+      summaryScreen.classList.remove('active');
+      doneScreen.classList.remove('active');
+      wizardPanel.classList.remove('hidden');
+      reviewing = false;
+
+      const current = visibleSteps[currentVisibleIndex];
+      if (current) {
+        current.classList.add('active');
+        const key = current.dataset.key;
+        showValidation(key, false);
+      }
+
+      backBtn.disabled = currentVisibleIndex === 0;
+      nextBtn.textContent = currentVisibleIndex === visibleSteps.length - 1 ? 'Revisar' : 'Próxima';
+      nextBtn.classList.toggle('secondary', currentVisibleIndex === visibleSteps.length - 1);
+      updateProgress();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function goNext() {
+      const visibleSteps = getVisibleSteps();
+      const current = visibleSteps[currentVisibleIndex];
+      if (!current || !validateStep(current)) return;
+
+      if (currentVisibleIndex === visibleSteps.length - 1) {
+        renderSummary();
+        return;
+      }
+
+      currentVisibleIndex += 1;
+      renderCurrentStep();
+    }
+
+    function goBack() {
+      if (reviewing) {
+        reviewing = false;
+        summaryScreen.classList.remove('active');
+        wizardPanel.classList.remove('hidden');
+        renderCurrentStep();
+        return;
+      }
+
+      if (currentVisibleIndex > 0) {
+        currentVisibleIndex -= 1;
+        renderCurrentStep();
+      }
+    }
+
+    function renderSummary() {
+      const data = collectData();
+      const entries = Object.entries(data).filter(([_, value]) => {
+        if (Array.isArray(value)) return value.length > 0;
+        return String(value).trim() !== '';
+      });
+
+      summaryList.innerHTML = entries.map(([key, value]) => `
+        <div class="summary-item">
+          <strong>${labels[key] || key}</strong>
+          <span>${Array.isArray(value) ? value.join(', ') : value}</span>
+        </div>
+      `).join('');
+
+      reviewing = true;
+      wizardPanel.classList.add('hidden');
+      summaryScreen.classList.add('active');
+      doneScreen.classList.remove('active');
+      nextBtn.textContent = 'Salvar resposta';
+      nextBtn.classList.add('secondary');
+      updateProgress();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function collectData() {
+      return {
+        bairro: getValue('bairro'),
+        idade: getValue('idade'),
+        genero: getValue('genero'),
+        lembranca_marca: getValue('lembranca_marca'),
+        conhece_solar: getValue('conhece_solar'),
+        ja_comprou: getValue('ja_comprou'),
+        frequencia: getValue('frequencia'),
+        pesquisa_online: getValue('pesquisa_online'),
+        influencia: getValue('influencia'),
+        intencao_reforma: getValue('intencao_reforma')
+      };
+    }
+
+    function saveInterview() {
+      const payload = collectData();
+      console.log('Dados da pesquisa:', payload);
+
+      summaryScreen.classList.remove('active');
+      wizardPanel.classList.add('hidden');
+      doneScreen.classList.add('active');
+      nextBtn.classList.add('hidden');
+      backBtn.classList.add('hidden');
+      progressText.textContent = 'Entrevista concluída';
+      progressTime.textContent = 'pronto para próxima coleta';
+      progressFill.style.width = '100%';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function updateCheckboxLimit() {
+      const checked = checkboxes.filter(i => i.checked);
+      const limitReached = checked.length >= 2;
+      checkCounter.textContent = `${checked.length}/2`;
+
+      checkboxes.forEach(input => {
+        if (!input.checked) input.disabled = limitReached;
+      });
+    }
+
+    document.querySelectorAll('[data-fill]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        bairroInput.value = btn.dataset.fill;
+        showValidation('bairro', false);
+      });
+    });
+
+    document.querySelectorAll('[data-target="lembranca_marca"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        marcaInput.value = btn.dataset.value;
+        showValidation('lembranca_marca', false);
+      });
+    });
+
+    form.addEventListener('change', event => {
+      if (event.target.name === 'conhece_solar' || event.target.name === 'ja_comprou') {
+        refreshConditionalSteps();
+        renderCurrentStep();
+      }
+
+      if (event.target.name === 'influencia') updateCheckboxLimit();
+      showValidation(event.target.name, false);
+    });
+
+    form.addEventListener('input', event => {
+      showValidation(event.target.name, false);
+    });
+
+    nextBtn.addEventListener('click', () => {
+      if (reviewing) {
+        saveInterview();
+      } else {
+        goNext();
+      }
+    });
+
+    backBtn.addEventListener('click', goBack);
+
+    newInterviewBtn.addEventListener('click', () => {
+      form.reset();
+      currentVisibleIndex = 0;
+      doneScreen.classList.remove('active');
+      nextBtn.classList.remove('hidden');
+      backBtn.classList.remove('hidden');
+      updateCheckboxLimit();
+      refreshConditionalSteps();
+      renderCurrentStep();
+    });
+
+    editInterviewBtn.addEventListener('click', () => {
+      doneScreen.classList.remove('active');
+      nextBtn.classList.remove('hidden');
+      backBtn.classList.remove('hidden');
+      reviewing = true;
+      renderSummary();
+    });
+
+    updateCheckboxLimit();
+    refreshConditionalSteps();
+    renderCurrentStep();
+      // Compact header on scroll
+    const hero = document.querySelector('.hero');
+    const topbar = document.querySelector('.topbar');
+    let ticking = false;
+
+    function handleHeaderScroll() {
+      const shouldCompact = window.scrollY > 36;
+      hero.classList.toggle('compact', shouldCompact);
+      topbar.classList.toggle('scrolled', shouldCompact);
+      ticking = false;
+    }
+
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        window.requestAnimationFrame(handleHeaderScroll);
+        ticking = true;
+      }
+    }, { passive: true });
+
+  </script>
+</body>
+</html>
