@@ -152,40 +152,6 @@
       filter: drop-shadow(0 6px 14px rgba(15, 23, 42, 0.14));
     }
 
-    .hero-logo-wrap {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin: 0 0 10px;
-      opacity: 0;
-      transform: translateY(10px) scale(0.98);
-      animation: logoEnter .7s cubic-bezier(.22, 1, .36, 1) .08s forwards;
-      transform-origin: top center;
-      transition: margin .34s ease, transform .34s ease, opacity .28s ease, max-height .34s ease;
-      max-height: 88px;
-      overflow: hidden;
-    }
-
-    .hero-logo {
-      display: block;
-      width: min(100%, 238px);
-      height: auto;
-      object-fit: contain;
-      filter: drop-shadow(0 10px 22px rgba(15, 23, 42, 0.16));
-      transition: width .34s ease, transform .34s ease, filter .34s ease;
-    }
-
-    .hero.compact .hero-logo-wrap {
-      margin-bottom: 6px;
-      max-height: 54px;
-      transform: translateY(0) scale(0.96);
-    }
-
-    .hero.compact .hero-logo {
-      width: min(100%, 170px);
-      filter: drop-shadow(0 6px 14px rgba(15, 23, 42, 0.14));
-    }
-
     .badge-row {
       display: flex;
       flex-wrap: wrap;
@@ -461,6 +427,11 @@
       box-shadow: inset 0 0 0 5px #fff;
     }
 
+    .choice input:disabled + .choice-card {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
     .helper-row {
       display: flex;
       align-items: center;
@@ -669,21 +640,6 @@
 
     @keyframes rise {
       from { opacity: 0; transform: translateY(12px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes logoFloatIn {
-      from {
-        opacity: 0;
-        transform: translateY(-8px) scale(.96);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
-    }
       to { opacity: 1; transform: translateY(0); }
     }
 
@@ -951,6 +907,8 @@
   </div>
 
   <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx4OE3GEbnGHNN9k4AnCK0W8qIm9KCOM0FFoJTmDCaYv6JopwVEcg5wS3unex1bI7G3/exec";
+
     const form = document.getElementById('surveyForm');
     const stepCards = Array.from(document.querySelectorAll('.step-card'));
     const progressFill = document.getElementById('progressFill');
@@ -1086,6 +1044,8 @@
       backBtn.disabled = currentVisibleIndex === 0;
       nextBtn.textContent = currentVisibleIndex === visibleSteps.length - 1 ? 'Revisar' : 'Próxima';
       nextBtn.classList.toggle('secondary', currentVisibleIndex === visibleSteps.length - 1);
+      nextBtn.classList.remove('hidden');
+      backBtn.classList.remove('hidden');
       updateProgress();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -1158,19 +1118,38 @@
       };
     }
 
-    function saveInterview() {
+    async function saveInterview() {
       const payload = collectData();
-      console.log('Dados da pesquisa:', payload);
 
-      summaryScreen.classList.remove('active');
-      wizardPanel.classList.add('hidden');
-      doneScreen.classList.add('active');
-      nextBtn.classList.add('hidden');
-      backBtn.classList.add('hidden');
-      progressText.textContent = 'Entrevista concluída';
-      progressTime.textContent = 'pronto para próxima coleta';
-      progressFill.style.width = '100%';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      try {
+        const response = await fetch(SCRIPT_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "text/plain;charset=utf-8"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+
+        if (!result.success) {
+          throw new Error(result.message || "Erro ao salvar");
+        }
+
+        summaryScreen.classList.remove('active');
+        wizardPanel.classList.add('hidden');
+        doneScreen.classList.add('active');
+        nextBtn.classList.add('hidden');
+        backBtn.classList.add('hidden');
+        progressText.textContent = 'Entrevista concluída';
+        progressTime.textContent = 'salva na planilha';
+        progressFill.style.width = '100%';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      } catch (error) {
+        alert("Erro ao salvar resposta: " + error.message);
+        console.error(error);
+      }
     }
 
     function updateCheckboxLimit() {
@@ -1224,7 +1203,9 @@
     newInterviewBtn.addEventListener('click', () => {
       form.reset();
       currentVisibleIndex = 0;
+      reviewing = false;
       doneScreen.classList.remove('active');
+      summaryScreen.classList.remove('active');
       nextBtn.classList.remove('hidden');
       backBtn.classList.remove('hidden');
       updateCheckboxLimit();
@@ -1236,14 +1217,13 @@
       doneScreen.classList.remove('active');
       nextBtn.classList.remove('hidden');
       backBtn.classList.remove('hidden');
-      reviewing = true;
       renderSummary();
     });
 
     updateCheckboxLimit();
     refreshConditionalSteps();
     renderCurrentStep();
-      // Compact header on scroll
+
     const hero = document.querySelector('.hero');
     const topbar = document.querySelector('.topbar');
     let ticking = false;
@@ -1261,7 +1241,6 @@
         ticking = true;
       }
     }, { passive: true });
-
   </script>
 </body>
 </html>
