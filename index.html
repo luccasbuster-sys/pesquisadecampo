@@ -534,6 +534,12 @@
       box-shadow: 0 18px 34px rgba(15,23,42,.18);
     }
 
+    .btn-next:disabled,
+    .btn-back:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
     .summary,
     .done {
       display: none;
@@ -909,99 +915,110 @@
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx4OE3GEbnGHNN9k4AnCK0W8qIm9KCOM0FFoJTmDCaYv6JopwVEcg5wS3unex1bI7G3/exec";
 
-    const form = document.getElementById('surveyForm');
-    const stepCards = Array.from(document.querySelectorAll('.step-card'));
-    const progressFill = document.getElementById('progressFill');
-    const progressText = document.getElementById('progressText');
-    const progressTime = document.getElementById('progressTime');
-    const backBtn = document.getElementById('backBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    const wizardPanel = document.getElementById('wizardPanel');
-    const summaryScreen = document.getElementById('summaryScreen');
-    const doneScreen = document.getElementById('doneScreen');
-    const summaryList = document.getElementById('summaryList');
-    const newInterviewBtn = document.getElementById('newInterviewBtn');
-    const editInterviewBtn = document.getElementById('editInterviewBtn');
-    const bairroInput = document.getElementById('bairro');
-    const marcaInput = document.getElementById('lembranca_marca');
+    const form = document.getElementById("surveyForm");
+    const stepCards = Array.from(document.querySelectorAll(".step-card"));
+    const progressFill = document.getElementById("progressFill");
+    const progressText = document.getElementById("progressText");
+    const progressTime = document.getElementById("progressTime");
+    const backBtn = document.getElementById("backBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const wizardPanel = document.getElementById("wizardPanel");
+    const summaryScreen = document.getElementById("summaryScreen");
+    const doneScreen = document.getElementById("doneScreen");
+    const summaryList = document.getElementById("summaryList");
+    const newInterviewBtn = document.getElementById("newInterviewBtn");
+    const editInterviewBtn = document.getElementById("editInterviewBtn");
+    const bairroInput = document.getElementById("bairro");
+    const marcaInput = document.getElementById("lembranca_marca");
     const checkboxes = Array.from(document.querySelectorAll('input[name="influencia"]'));
-    const checkCounter = document.getElementById('checkCounter');
+    const checkCounter = document.getElementById("checkCounter");
 
     let currentVisibleIndex = 0;
     let reviewing = false;
+    let isSaving = false;
 
     const labels = {
-      bairro: 'Bairro',
-      idade: 'Idade',
-      genero: 'Gênero',
-      lembranca_marca: 'Primeira loja lembrada',
-      conhece_solar: 'Conhece a Solar',
-      ja_comprou: 'Já comprou na Solar',
-      frequencia: 'Frequência de compra',
-      pesquisa_online: 'Pesquisa online',
-      influencia: 'Fatores de decisão',
-      intencao_reforma: 'Pretende construir ou reformar'
+      bairro: "Bairro",
+      idade: "Idade",
+      genero: "Gênero",
+      lembranca_marca: "Primeira loja lembrada",
+      conhece_solar: "Conhece a Solar",
+      ja_comprou: "Já comprou na Solar",
+      frequencia: "Frequência de compra",
+      pesquisa_online: "Pesquisa online",
+      influencia: "Fatores de decisão",
+      intencao_reforma: "Pretende construir ou reformar"
     };
 
     function getValue(name) {
       const nodes = form.elements[name];
-      if (!nodes) return '';
+      if (!nodes) return "";
 
       if (nodes instanceof RadioNodeList) {
         const arr = Array.from(nodes);
-        if (!arr.length) return '';
-        if (arr[0].type === 'checkbox') return arr.filter(i => i.checked).map(i => i.value);
-        return arr.find(i => i.checked)?.value || '';
+        if (!arr.length) return "";
+        if (arr[0].type === "checkbox") return arr.filter(i => i.checked).map(i => i.value);
+        return arr.find(i => i.checked)?.value || "";
       }
 
-      return nodes.value.trim();
+      return (nodes.value || "").trim();
     }
 
     function shouldShowStep(step) {
       const condition = step.dataset.conditional;
       if (!condition) return true;
 
-      const groups = condition.split('|');
+      const groups = condition.split("|");
       return groups.every(rule => {
-        const [field, expected] = rule.split('=');
+        const [field, expected] = rule.split("=");
         return getValue(field) === expected;
       });
+    }
+
+    function clearFieldValue(key) {
+      const field = form.elements[key];
+      if (!field) return;
+
+      if (field instanceof RadioNodeList) {
+        Array.from(field).forEach(input => {
+          input.checked = false;
+        });
+      } else {
+        field.value = "";
+      }
     }
 
     function refreshConditionalSteps() {
       stepCards.forEach(step => {
         const visible = shouldShowStep(step);
-        step.classList.toggle('hidden', !visible);
+        step.classList.toggle("hidden", !visible);
 
         if (!visible) {
-          const key = step.dataset.key;
-          const field = form.elements[key];
-          if (field instanceof RadioNodeList) {
-            Array.from(field).forEach(i => i.checked = false);
-          } else if (field) {
-            field.value = '';
-          }
+          clearFieldValue(step.dataset.key);
+          showValidation(step.dataset.key, false);
         }
       });
+
+      updateCheckboxLimit();
     }
 
     function getVisibleSteps() {
       refreshConditionalSteps();
-      return stepCards.filter(step => !step.classList.contains('hidden'));
+      return stepCards.filter(step => !step.classList.contains("hidden"));
     }
 
     function showValidation(key, show) {
       const el = document.querySelector(`[data-error-for="${key}"]`);
-      if (el) el.classList.toggle('show', !!show);
+      if (el) el.classList.toggle("show", !!show);
     }
 
     function validateStep(step) {
       const key = step.dataset.key;
       let valid = false;
 
-      if (key === 'bairro' || key === 'lembranca_marca') {
+      if (key === "bairro" || key === "lembranca_marca") {
         valid = getValue(key).length > 0;
-      } else if (key === 'influencia') {
+      } else if (key === "influencia") {
         valid = getValue(key).length > 0;
       } else {
         valid = !!getValue(key);
@@ -1018,41 +1035,44 @@
       const percent = total ? Math.round((position / total) * 100) : 0;
       const remaining = Math.max((total - position) * 6, 0);
 
-      progressFill.style.width = percent + '%';
-      progressText.textContent = reviewing ? 'Revisão final' : `Pergunta ${position} de ${total}`;
-      progressTime.textContent = reviewing ? 'pronto para salvar' : `~ ${remaining || 5}s restantes`;
+      progressFill.style.width = percent + "%";
+      progressText.textContent = reviewing ? "Revisão final" : `Pergunta ${position} de ${total}`;
+      progressTime.textContent = reviewing ? "pronto para salvar" : `~ ${remaining || 5}s restantes`;
     }
 
     function renderCurrentStep() {
       const visibleSteps = getVisibleSteps();
+
       if (currentVisibleIndex > visibleSteps.length - 1) currentVisibleIndex = visibleSteps.length - 1;
       if (currentVisibleIndex < 0) currentVisibleIndex = 0;
 
-      stepCards.forEach(step => step.classList.remove('active'));
-      summaryScreen.classList.remove('active');
-      doneScreen.classList.remove('active');
-      wizardPanel.classList.remove('hidden');
+      stepCards.forEach(step => step.classList.remove("active"));
+      summaryScreen.classList.remove("active");
+      doneScreen.classList.remove("active");
+      wizardPanel.classList.remove("hidden");
       reviewing = false;
 
       const current = visibleSteps[currentVisibleIndex];
       if (current) {
-        current.classList.add('active');
-        const key = current.dataset.key;
-        showValidation(key, false);
+        current.classList.add("active");
+        showValidation(current.dataset.key, false);
       }
 
-      backBtn.disabled = currentVisibleIndex === 0;
-      nextBtn.textContent = currentVisibleIndex === visibleSteps.length - 1 ? 'Revisar' : 'Próxima';
-      nextBtn.classList.toggle('secondary', currentVisibleIndex === visibleSteps.length - 1);
-      nextBtn.classList.remove('hidden');
-      backBtn.classList.remove('hidden');
+      backBtn.disabled = currentVisibleIndex === 0 || isSaving;
+      nextBtn.disabled = isSaving;
+      nextBtn.textContent = currentVisibleIndex === visibleSteps.length - 1 ? "Revisar" : "Próxima";
+      nextBtn.classList.toggle("secondary", currentVisibleIndex === visibleSteps.length - 1);
+      nextBtn.classList.remove("hidden");
+      backBtn.classList.remove("hidden");
+
       updateProgress();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
     function goNext() {
       const visibleSteps = getVisibleSteps();
       const current = visibleSteps[currentVisibleIndex];
+
       if (!current || !validateStep(current)) return;
 
       if (currentVisibleIndex === visibleSteps.length - 1) {
@@ -1065,10 +1085,12 @@
     }
 
     function goBack() {
+      if (isSaving) return;
+
       if (reviewing) {
         reviewing = false;
-        summaryScreen.classList.remove('active');
-        wizardPanel.classList.remove('hidden');
+        summaryScreen.classList.remove("active");
+        wizardPanel.classList.remove("hidden");
         renderCurrentStep();
         return;
       }
@@ -1083,72 +1105,105 @@
       const data = collectData();
       const entries = Object.entries(data).filter(([_, value]) => {
         if (Array.isArray(value)) return value.length > 0;
-        return String(value).trim() !== '';
+        return String(value).trim() !== "";
       });
 
       summaryList.innerHTML = entries.map(([key, value]) => `
         <div class="summary-item">
           <strong>${labels[key] || key}</strong>
-          <span>${Array.isArray(value) ? value.join(', ') : value}</span>
+          <span>${Array.isArray(value) ? value.join(", ") : value}</span>
         </div>
-      `).join('');
+      `).join("");
 
       reviewing = true;
-      wizardPanel.classList.add('hidden');
-      summaryScreen.classList.add('active');
-      doneScreen.classList.remove('active');
-      nextBtn.textContent = 'Salvar resposta';
-      nextBtn.classList.add('secondary');
+      wizardPanel.classList.add("hidden");
+      summaryScreen.classList.add("active");
+      doneScreen.classList.remove("active");
+      nextBtn.textContent = "Salvar resposta";
+      nextBtn.classList.add("secondary");
+      nextBtn.disabled = false;
+      backBtn.disabled = false;
+
       updateProgress();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
     function collectData() {
       return {
-        bairro: getValue('bairro'),
-        idade: getValue('idade'),
-        genero: getValue('genero'),
-        lembranca_marca: getValue('lembranca_marca'),
-        conhece_solar: getValue('conhece_solar'),
-        ja_comprou: getValue('ja_comprou'),
-        frequencia: getValue('frequencia'),
-        pesquisa_online: getValue('pesquisa_online'),
-        influencia: getValue('influencia'),
-        intencao_reforma: getValue('intencao_reforma')
+        bairro: getValue("bairro"),
+        idade: getValue("idade"),
+        genero: getValue("genero"),
+        lembranca_marca: getValue("lembranca_marca"),
+        conhece_solar: getValue("conhece_solar"),
+        ja_comprou: getValue("ja_comprou"),
+        frequencia: getValue("frequencia"),
+        pesquisa_online: getValue("pesquisa_online"),
+        influencia: getValue("influencia"),
+        intencao_reforma: getValue("intencao_reforma")
       };
+    }
+
+    function setSavingState(saving) {
+      isSaving = saving;
+      nextBtn.disabled = saving;
+      backBtn.disabled = saving;
+
+      if (saving) {
+        nextBtn.textContent = "Salvando...";
+      }
     }
 
     async function saveInterview() {
       const payload = collectData();
+      setSavingState(true);
 
       try {
         const response = await fetch(SCRIPT_URL, {
           method: "POST",
+          body: JSON.stringify(payload),
+          redirect: "follow",
           headers: {
             "Content-Type": "text/plain;charset=utf-8"
-          },
-          body: JSON.stringify(payload)
+          }
         });
 
-        const result = await response.json();
+        const text = await response.text();
+
+        let result;
+        try {
+          result = JSON.parse(text);
+        } catch (parseError) {
+          throw new Error("Resposta inválida do Apps Script: " + text);
+        }
+
+        if (!response.ok) {
+          throw new Error(result.message || `Erro HTTP ${response.status}`);
+        }
 
         if (!result.success) {
           throw new Error(result.message || "Erro ao salvar");
         }
 
-        summaryScreen.classList.remove('active');
-        wizardPanel.classList.add('hidden');
-        doneScreen.classList.add('active');
-        nextBtn.classList.add('hidden');
-        backBtn.classList.add('hidden');
-        progressText.textContent = 'Entrevista concluída';
-        progressTime.textContent = 'salva na planilha';
-        progressFill.style.width = '100%';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        summaryScreen.classList.remove("active");
+        wizardPanel.classList.add("hidden");
+        doneScreen.classList.add("active");
+        nextBtn.classList.add("hidden");
+        backBtn.classList.add("hidden");
+        progressText.textContent = "Entrevista concluída";
+        progressTime.textContent = "salva na planilha";
+        progressFill.style.width = "100%";
+        window.scrollTo({ top: 0, behavior: "smooth" });
 
       } catch (error) {
-        alert("Erro ao salvar resposta: " + error.message);
-        console.error(error);
+        console.error("Erro completo:", error);
+        alert(
+          "Erro ao salvar resposta.\n\n" +
+          "Verifique se o Apps Script está publicado como Aplicativo da Web com acesso 'Qualquer pessoa' e se a implantação foi atualizada.\n\n" +
+          "Detalhe: " + error.message
+        );
+        renderSummary();
+      } finally {
+        setSavingState(false);
       }
     }
 
@@ -1158,39 +1213,55 @@
       checkCounter.textContent = `${checked.length}/2`;
 
       checkboxes.forEach(input => {
-        if (!input.checked) input.disabled = limitReached;
+        if (!input.checked) {
+          input.disabled = limitReached;
+        }
       });
     }
 
-    document.querySelectorAll('[data-fill]').forEach(btn => {
-      btn.addEventListener('click', () => {
+    document.querySelectorAll("[data-fill]").forEach(btn => {
+      btn.addEventListener("click", () => {
         bairroInput.value = btn.dataset.fill;
-        showValidation('bairro', false);
+        showValidation("bairro", false);
       });
     });
 
     document.querySelectorAll('[data-target="lembranca_marca"]').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener("click", () => {
         marcaInput.value = btn.dataset.value;
-        showValidation('lembranca_marca', false);
+        showValidation("lembranca_marca", false);
       });
     });
 
-    form.addEventListener('change', event => {
-      if (event.target.name === 'conhece_solar' || event.target.name === 'ja_comprou') {
+    form.addEventListener("change", event => {
+      if (event.target.name === "conhece_solar" || event.target.name === "ja_comprou") {
+        const visibleSteps = getVisibleSteps();
+        const currentStep = visibleSteps[currentVisibleIndex];
+
         refreshConditionalSteps();
+
+        const newVisibleSteps = getVisibleSteps();
+        if (currentStep && !newVisibleSteps.includes(currentStep)) {
+          currentVisibleIndex = Math.max(0, currentVisibleIndex - 1);
+        }
+
         renderCurrentStep();
       }
 
-      if (event.target.name === 'influencia') updateCheckboxLimit();
+      if (event.target.name === "influencia") {
+        updateCheckboxLimit();
+      }
+
       showValidation(event.target.name, false);
     });
 
-    form.addEventListener('input', event => {
+    form.addEventListener("input", event => {
       showValidation(event.target.name, false);
     });
 
-    nextBtn.addEventListener('click', () => {
+    nextBtn.addEventListener("click", () => {
+      if (isSaving) return;
+
       if (reviewing) {
         saveInterview();
       } else {
@@ -1198,25 +1269,28 @@
       }
     });
 
-    backBtn.addEventListener('click', goBack);
+    backBtn.addEventListener("click", goBack);
 
-    newInterviewBtn.addEventListener('click', () => {
+    newInterviewBtn.addEventListener("click", () => {
       form.reset();
       currentVisibleIndex = 0;
       reviewing = false;
-      doneScreen.classList.remove('active');
-      summaryScreen.classList.remove('active');
-      nextBtn.classList.remove('hidden');
-      backBtn.classList.remove('hidden');
+      isSaving = false;
+      doneScreen.classList.remove("active");
+      summaryScreen.classList.remove("active");
+      nextBtn.classList.remove("hidden");
+      backBtn.classList.remove("hidden");
+      nextBtn.disabled = false;
+      backBtn.disabled = false;
       updateCheckboxLimit();
       refreshConditionalSteps();
       renderCurrentStep();
     });
 
-    editInterviewBtn.addEventListener('click', () => {
-      doneScreen.classList.remove('active');
-      nextBtn.classList.remove('hidden');
-      backBtn.classList.remove('hidden');
+    editInterviewBtn.addEventListener("click", () => {
+      doneScreen.classList.remove("active");
+      nextBtn.classList.remove("hidden");
+      backBtn.classList.remove("hidden");
       renderSummary();
     });
 
@@ -1224,18 +1298,18 @@
     refreshConditionalSteps();
     renderCurrentStep();
 
-    const hero = document.querySelector('.hero');
-    const topbar = document.querySelector('.topbar');
+    const hero = document.querySelector(".hero");
+    const topbar = document.querySelector(".topbar");
     let ticking = false;
 
     function handleHeaderScroll() {
       const shouldCompact = window.scrollY > 36;
-      hero.classList.toggle('compact', shouldCompact);
-      topbar.classList.toggle('scrolled', shouldCompact);
+      hero.classList.toggle("compact", shouldCompact);
+      topbar.classList.toggle("scrolled", shouldCompact);
       ticking = false;
     }
 
-    window.addEventListener('scroll', () => {
+    window.addEventListener("scroll", () => {
       if (!ticking) {
         window.requestAnimationFrame(handleHeaderScroll);
         ticking = true;
